@@ -44,7 +44,7 @@
       <HintPath>..\packages\NSubstitute.4.0.0\lib\net46\NSubstitute.dll</HintPath>
     </Reference>
     <Reference Include="SharpNetSH.Dev, Version=2.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpNetSH.Dev.2.0.5-dawidcieszynski-firewall-201905032016\lib\net35\SharpNetSH.Dev.dll</HintPath>
+      <HintPath>..\packages\SharpNetSH.Dev.2.0.5-dawidcieszynski-firewall-201905041634\lib\net35\SharpNetSH.Dev.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
