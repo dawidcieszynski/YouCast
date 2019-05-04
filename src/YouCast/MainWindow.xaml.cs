@@ -16,6 +16,7 @@ using MenuItem = System.Windows.Forms.MenuItem;
 
 namespace YouCast
 {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public partial class MainWindow
     {
         private const string _cloudHostName = "youcast.cloudapp.net";

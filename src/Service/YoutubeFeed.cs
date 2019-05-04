@@ -3,6 +3,7 @@ using Google.Apis.YouTube.v3.Data;
 using MoreLinq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Runtime.Caching;
@@ -21,6 +22,8 @@ using YouTubeService = Google.Apis.YouTube.v3.YouTubeService;
 namespace Service
 {
     [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
     public sealed class YoutubeFeed : IYoutubeFeed
     {
         private const string _channelUrlFormat = "http://www.youtube.com/channel/{0}";
