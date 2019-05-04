@@ -8,7 +8,6 @@
   "dependencies": {
     "Costura.Fody": "4.0.0",
     "NLog": "4.6.3",
-    "NLog.Config": "4.6.3",
     "NLog.Schema": "4.6.3",
     "NlogViewer": "0.7.0",
     "SharpNetSH.Dev": "2.0.5-dawidcieszynski-firewall-201905041634"
