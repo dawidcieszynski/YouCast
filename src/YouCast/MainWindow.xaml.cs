@@ -36,11 +36,11 @@ namespace YouCast
             InitializeComponent();
 
             _myNotifyIcon = new System.Windows.Forms.NotifyIcon { Icon = Properties.Resources.rss };
-            _myNotifyIcon.MouseDoubleClick += (a, b) => WindowState = WindowState.Normal;
+            _myNotifyIcon.MouseDoubleClick += (a, b) => BringWindow();
             _myNotifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu(
                 new[]
                 {
-                    new MenuItem("Open", (a, b) => WindowState = WindowState.Normal),
+                    new MenuItem("Open", (a, b) => BringWindow()),
                     new MenuItem("-"),
                     new MenuItem(
                         "Exit",
@@ -56,6 +56,12 @@ namespace YouCast
 
             PopulateQualities();
             LoadNetworkSettings();
+        }
+
+        private void BringWindow()
+        {
+            WindowState = WindowState.Normal;
+            Activate();
         }
 
         private void PopulateQualities()
