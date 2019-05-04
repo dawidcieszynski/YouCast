@@ -11,6 +11,7 @@ using System.ServiceModel.Syndication;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using NLog;
 using VideoLibrary;
 using YoutubeExplode;
 using YoutubeExplode.Models.MediaStreams;
@@ -26,12 +27,14 @@ namespace Service
         private const string _videoUrlFormat = "http://www.youtube.com/watch?v={0}";
         private const string _playlistUrlFormat = "http://www.youtube.com/playlist?list={0}";
 
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         private readonly YoutubeClient _youtubeClient;
         private readonly YouTubeService _youtubeService;
 
         public YoutubeFeed()
         {
-            _youtubeClient= new YoutubeClient();
+            _youtubeClient = new YoutubeClient();
             _youtubeService =
                 new YouTubeService(
                     new BaseClientService.Initializer
@@ -39,6 +42,8 @@ namespace Service
                         ApiKey = "AIzaSyD0E4ozDor6cgdyQKHvOgLCrrQMEX226Qc",
                         ApplicationName = "YouCast2",
                     });
+
+            Logger.Info($"{nameof(YoutubeFeed)} created");
         }
 
         public async Task<SyndicationFeedFormatter> GetUserFeedAsync(
@@ -47,6 +52,8 @@ namespace Service
             int maxLength,
             bool isPopular)
         {
+            Logger.Info($"{nameof(GetUserFeedAsync)} for user {userId} requested");
+
             var baseAddress = GetBaseAddress();
 
             const string fields = "items(contentDetails,id,snippet)";
@@ -96,6 +103,8 @@ namespace Service
             int maxLength,
             bool isPopular)
         {
+            Logger.Info($"{nameof(GetPlaylistFeedAsync)} for playlist {playlistId} requested");
+
             var baseAddress = GetBaseAddress();
 
             var arguments = new Arguments(
@@ -132,9 +141,11 @@ namespace Service
 
         public async Task GetVideoAsync(string videoId, string encoding)
         {
+            Logger.Info($"{nameof(GetVideoAsync)} for video {videoId} requested");
+
             var context = WebOperationContext.Current;
             var resolution = int.Parse(encoding.Remove(encoding.Length - 1).Substring(startIndex: 4));
-            var tasks = new []
+            var tasks = new[]
             {
                 GetYoutubeExplodeUriAsync(videoId, resolution),
                 GetLibVideoUriAsync(videoId, resolution)
@@ -165,6 +176,8 @@ namespace Service
 
         public async Task GetAudioAsync(string videoId)
         {
+            Logger.Info($"{nameof(GetAudioAsync)} for video {videoId} requested");
+
             var context = WebOperationContext.Current;
 
             var videos = await YouTube.Default.GetAllVideosAsync(string.Format(_videoUrlFormat, videoId));
@@ -173,7 +186,7 @@ namespace Service
                 ToList();
             if (audios.Count > 0)
             {
-                var redirectUri = await audios.MaxBy(_ => _.AudioBitrate).GetUriAsync();
+                var redirectUri = await audios.MaxBy(_ => _.AudioBitrate).First().GetUriAsync();
                 context.OutgoingResponse.StatusCode = HttpStatusCode.Redirect;
                 context.OutgoingResponse.Headers["Location"] = redirectUri;
             }
@@ -303,7 +316,7 @@ namespace Service
             var nonAdaptiveVideos = videos.Where(_ => _.Format == VideoFormat.Mp4 && !_.IsAdaptive).ToList();
             var nonAdaptiveVideo =
                 nonAdaptiveVideos.FirstOrDefault(_ => _.Resolution == resolution) ??
-                nonAdaptiveVideos.MaxBy(_ => _.Resolution);
+                nonAdaptiveVideos.MaxBy(_ => _.Resolution).First();
 
             return nonAdaptiveVideo == null ? null : await nonAdaptiveVideo.GetUriAsync();
         }

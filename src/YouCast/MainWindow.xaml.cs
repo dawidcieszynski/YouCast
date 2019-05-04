@@ -10,6 +10,7 @@ using System.ServiceModel.Web;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using NLog;
 using YouCast.Properties;
 using MenuItem = System.Windows.Forms.MenuItem;
 
@@ -23,6 +24,7 @@ namespace YouCast
 
         private readonly System.Windows.Forms.NotifyIcon _myNotifyIcon;
         private readonly string _localIp;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private string _baseAddress;
         private bool _gotFocus;
@@ -214,6 +216,8 @@ namespace YouCast
 
             try
             {
+                Logger.Info($"Starting service: {_serviceHost.Description.Endpoints.FirstOrDefault()?.Address}");
+
                 _serviceHost.Open();
 
                 if (_serviceHost.State != CommunicationState.Opened &&
@@ -238,6 +242,7 @@ namespace YouCast
 
             try
             {
+                Logger.Info($"Closing service: {_serviceHost.Description.Endpoints.FirstOrDefault()?.Address}");
                 _serviceHost.Close();
             }
             catch (Exception)
