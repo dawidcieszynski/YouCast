@@ -33,7 +33,7 @@ namespace YouCast
         {
             InitializeComponent();
 
-            _myNotifyIcon = new System.Windows.Forms.NotifyIcon { Icon = new System.Drawing.Icon("rss.ico") };
+            _myNotifyIcon = new System.Windows.Forms.NotifyIcon { Icon = Properties.Resources.rss };
             _myNotifyIcon.MouseDoubleClick += (a, b) => WindowState = WindowState.Normal;
             _myNotifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu(
                 new[]

@@ -4,7 +4,7 @@
         xmlns:youCast="clr-namespace:YouCast"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="YouCast.MainWindow"
         Loaded="Window_Loaded_1"
-        Icon="rss.ico"
+        Icon="pack://application:,,,/YouCast;component/rss.ico"
         StateChanged="Window_StateChanged_1"
         FontFamily="tahoma"
         FontSize="13"
@@ -161,7 +161,7 @@
         <TabItem Header="About">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
-                    <Image HorizontalAlignment="Left" Source="rss.ico" Height="90" />
+                    <Image HorizontalAlignment="Left" Source="pack://application:,,,/YouCast;component/rss.ico" Height="90" />
                     <Button 
                         x:Name="YoucastLink" 
                         Style="{StaticResource LinkButton}"  

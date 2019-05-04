@@ -110,9 +110,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="rss.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="rss.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
