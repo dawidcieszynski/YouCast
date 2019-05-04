@@ -4,6 +4,7 @@
         xmlns:youCast="clr-namespace:YouCast"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:nlogViewer="clr-namespace:NlogViewer;assembly=NlogViewer"
+        xmlns:helpers="clr-namespace:YouCast.Helpers"
         mc:Ignorable="d" x:Class="YouCast.MainWindow"
         Loaded="Window_Loaded_1"
         Icon="pack://application:,,,/YouCast;component/rss.ico"
@@ -135,10 +136,21 @@
                         </DockPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button 
-                                x:Name="Change" 
-                                Margin="5,5,5,5"
+                                Margin="5"
                                 ToolTip="Change these settings only if you know what you're doing."
-                                Height="26" Click="Change_Click" Content="Change"/>
+                                MinHeight="26" Click="Change_Click">
+                                <DockPanel LastChildFill="True">
+                                    <Image 
+                                        Margin="5"
+                                        DockPanel.Dock="Left"
+                                        Visibility="{x:Static helpers:PermissionsHelper.NoAdministratorPermissions}"
+                                        Source="{x:Static helpers:IconHelper.GetShieldIcon}">
+                                    </Image>
+                                    <TextBlock Margin="5">
+                                        Change
+                                    </TextBlock>
+                                </DockPanel>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>

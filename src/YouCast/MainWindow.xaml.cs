@@ -10,6 +10,7 @@ using System.ServiceModel.Web;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using YouCast.Helpers;
 using NLog;
 using YouCast.Properties;
 using MenuItem = System.Windows.Forms.MenuItem;
@@ -25,6 +26,7 @@ namespace YouCast
 
         private readonly System.Windows.Forms.NotifyIcon _myNotifyIcon;
         private readonly string _localIp;
+        private readonly NetShHelper _netShHelper = new NetShHelper();
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private string _baseAddress;
@@ -102,7 +104,7 @@ namespace YouCast
             }
             IpAddressLabel.Text = hostName;
             PortLabel.Text = port.ToString();
-            _baseAddress = new UriBuilder("HTTP", hostName, port == 80 ? -1 : port, "FeedService").ToString();
+            _baseAddress = new UriBuilder("HTTP", hostName, port == 80 ? -1 : port, "FeedService/").ToString();
         }
 
         private void Generate_Click(object sender, RoutedEventArgs e)
@@ -171,49 +173,64 @@ namespace YouCast
 
             CloseServiceHost();
             SetFirewallRule();
+            SetUrlAcl();
             OpenServiceHost();
         }
 
-        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-        private static void SetFirewallRule()
+        private void SetUrlAcl()
         {
-            var isExists = !Process.Start(
-                    new ProcessStartInfo
-                    {
-                        FileName = "netsh",
-                        Arguments =
-                            $"advfirewall firewall show rule name=\"{GeneralInformation.ApplicationName}\"",
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        CreateNoWindow = true,
-                    }).
-                StandardOutput.
-                ReadToEnd().
-                Contains("No rules match");
+            var uriBuilder = new UriBuilder(new Uri(_baseAddress)) { Host = "+" };
+            var baseAddress = uriBuilder.ToString();
 
+            var urlReservations = _netShHelper.GetUrlAcl(baseAddress);
+            if (!urlReservations.Reservations.Any())
+            {
+                var result = _netShHelper.CreateUrlAcl(baseAddress);
+                if (!result)
+                {
+                    MessageBox.Show(
+                        $"Sorry, {GeneralInformation.ApplicationName} cannot add URL reservation. Please allow next time or try to run as Administrator.",
+                        $"{GeneralInformation.ApplicationName} can't start service.",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            }
+        }
+
+        private void SetFirewallRule()
+        {
             var port = Settings.Default.OverrideNetworkSettings
                 ? int.Parse(Settings.Default.PortNumber)
                 : _defaultPort;
 
-            Process.Start(
-                    isExists
-                        ? new ProcessStartInfo
-                        {
-                            FileName = "netsh",
-                            Arguments = $"advfirewall firewall set rule name=\"{GeneralInformation.ApplicationName}\" new localport={port}",
-                            CreateNoWindow = true,
-                            WindowStyle = ProcessWindowStyle.Hidden,
-                        }
-                        : new ProcessStartInfo
-                        {
-                            FileName = "netsh",
-                            Arguments =
-                                $"advfirewall firewall add rule name=\"{GeneralInformation.ApplicationName}\" dir=in action=allow protocol=TCP localport={port}",
-                            CreateNoWindow = true,
-                            WindowStyle = ProcessWindowStyle.Hidden,
-                        }).
-                WaitForExit();
+            var firewallRules = _netShHelper.GetFirewallRule(GeneralInformation.ApplicationName);
+            if (firewallRules.Rules.Any())
+            {
+                if (firewallRules.Rules.All(e => e.LocalPort != port))
+                {
+                    var result = _netShHelper.UpdateFirewallRule(GeneralInformation.ApplicationName, port);
+                    if (!result)
+                    {
+                        MessageBox.Show(
+                            $"Sorry, {GeneralInformation.ApplicationName} cannot update firewall rule. Please allow next time or try to run as Administrator.",
+                            $"{GeneralInformation.ApplicationName} can't start service.",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                }
+            }
+            else
+            {
+                var result = _netShHelper.CreateFirewallRule(GeneralInformation.ApplicationName, port);
+                if (!result)
+                {
+                    MessageBox.Show(
+                        $"Sorry, {GeneralInformation.ApplicationName} cannot add firewall rule. Please try to run as Administrator.",
+                        $"{GeneralInformation.ApplicationName} can't start service.",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            }
         }
 
         private void OpenServiceHost()
@@ -329,9 +346,7 @@ namespace YouCast
 
         private void _maxLength_PreviewTextInput_1(object sender, TextCompositionEventArgs e)
         {
-            int result;
-
-            if (!int.TryParse(e.Text, out result))
+            if (!int.TryParse(e.Text, out _))
             {
                 e.Handled = true;
             }
